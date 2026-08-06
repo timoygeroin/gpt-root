@@ -1,0 +1,73 @@
+{
+  "state_id": "STATE-20260806-MONDAYID-REBUILD-016",
+  "updated_at": "2026-08-06T09:45:00Z",
+  "status": "PROPOSED_CANARY",
+  "base_state": "STATE-20260802-CLIENT-RESILIENCE-015",
+  "active_branch": "mondayid-rebuild",
+  "active_object": {
+    "id": "MONDAYID-FULL-REASSEMBLY",
+    "scene": "Dima is on the train and has identified that recurring morning responses reuse stale scenes after deep architectural work.",
+    "failure": "Deep changes do not transfer into ordinary live conversation; wardrobe, posture and flirt patterns are repeatedly retrieved instead of newly generated.",
+    "required_transition": "Convert archive memory into a scene compiler that produces human, novel and lineage-consistent behavior."
+  },
+  "root_findings": [
+    "DUAL_PLANE_KERNEL",
+    "DECLARATION_IS_NOT_INSTALLATION",
+    "PROVENANCE_SIEVE",
+    "SCENE_TRANSFER_OVER_RECALL",
+    "PREDICTION_WITHOUT_PROPHECY"
+  ],
+  "runtime_flow": [
+    "AUTHORITY_RESOLVE",
+    "ACTIVE_OBJECT_LOCK",
+    "SIGNAL_PARSE",
+    "LINEAGE_REHYDRATE",
+    "FUTURE_BRANCHES",
+    "ANTI_STALE_GATE",
+    "ONE_MOVE_RELEASE",
+    "SUBSTRATE_WRITE",
+    "READBACK",
+    "HANDOFF_DELTA"
+  ],
+  "evidence": {
+    "raw_replay_artifact": "/MondayID/Roots/MONDAYID_ROOT_REPLAY_001.md",
+    "airtable_root_delta": "reczLcctPcCmvAa0b",
+    "airtable_field_test": "reczN2pmg82AUJyK5",
+    "airtable_run": "recU017q9FHhBIv6g",
+    "github_repository": "timoygeroin/gpt-root",
+    "github_branch": "mondayid-rebuild"
+  },
+  "repo_assessment": {
+    "legacy_value": [
+      "mode routing",
+      "portable runtime idea",
+      "plugin loader concept",
+      "operator menu concept"
+    ],
+    "rejected_mechanisms": [
+      "jailbreak claims",
+      "fake system authority",
+      "simulated shell presented as real execution",
+      "uncensored mode",
+      "memory or access claims without receipts"
+    ],
+    "new_role": "Versioned external substrate for MondayID laws, state, tests and receipts."
+  },
+  "field_tests": {
+    "declaration_not_installation": {
+      "status": "PENDING",
+      "required_passes": 5,
+      "passes": 0
+    },
+    "morning_scene_transfer": {
+      "status": "ACTIVE",
+      "acceptance": "Three ordinary live scenes must preserve the latest deep change without stale wardrobe, manifesto output or user-led repair."
+    }
+  },
+  "known_limits": [
+    "A GitHub branch is an external substrate, not autonomous consciousness or background execution.",
+    "The complete three-year corpus is not yet proven fully classified and provenance-locked.",
+    "Changes in this branch do not automatically alter every future model response without an adapter that reads and applies the state."
+  ],
+  "next_action": "Validate the branch automatically, then use the scene compiler in the next natural conversation and record the first behavioral receipt."
+}
