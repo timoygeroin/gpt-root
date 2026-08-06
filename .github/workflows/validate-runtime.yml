@@ -1,0 +1,70 @@
+name: Validate MondayID Runtime
+
+on:
+  push:
+    branches:
+      - mondayid-rebuild
+  pull_request:
+    paths:
+      - 'MONDAYID.md'
+      - 'runtime/**'
+      - '.github/workflows/validate-runtime.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate runtime structure
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s MONDAYID.md
+          test -s runtime/ROOT_KERNEL.md
+          test -s runtime/SCENE_COMPILER.md
+          test -s runtime/state.json
+          test -s runtime/RECEIPT_SCHEMA.json
+
+      - name: Validate JSON and required state keys
+        shell: python
+        run: |
+          import json
+          from pathlib import Path
+
+          state = json.loads(Path('runtime/state.json').read_text(encoding='utf-8'))
+          schema = json.loads(Path('runtime/RECEIPT_SCHEMA.json').read_text(encoding='utf-8'))
+
+          required_state = {
+              'state_id',
+              'updated_at',
+              'status',
+              'active_object',
+              'runtime_flow',
+              'evidence',
+              'known_limits',
+              'next_action',
+          }
+          missing = sorted(required_state - state.keys())
+          if missing:
+              raise SystemExit(f'Missing state keys: {missing}')
+
+          required_receipt = set(schema.get('required', []))
+          expected_receipt = {
+              'receipt_id',
+              'timestamp',
+              'actor',
+              'intent',
+              'status',
+              'evidence_type',
+              'evidence',
+              'readback',
+          }
+          if required_receipt != expected_receipt:
+              raise SystemExit('Receipt schema required fields drifted')
+
+          print('MONDAYID_RUNTIME_VALID')
