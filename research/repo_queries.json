@@ -1,0 +1,36 @@
+{
+  "gateway": [
+    "llm gateway multi provider router fallback language:Python stars:>500",
+    "openai compatible proxy gemini claude codex language:Go stars:>100",
+    "model router long context fallback llm stars:>100"
+  ],
+  "memory": [
+    "ai agent persistent memory model agnostic stars:>500",
+    "portable context memory claude gemini chatgpt stars:>50",
+    "git backed agent memory continual learning stars:>50"
+  ],
+  "orchestration": [
+    "stateful agent durable execution checkpoint stars:>500",
+    "multi agent orchestration MCP A2A stars:>100",
+    "AI agent workflow human in the loop stars:>500"
+  ],
+  "execution": [
+    "AI coding agent sandbox docker terminal stars:>1000",
+    "agent computer use sandbox MCP stars:>200",
+    "autonomous agent github issue resolver stars:>500"
+  ],
+  "interface": [
+    "self hosted multi model AI chat MCP stars:>1000",
+    "open source chat interface OpenAI Claude Gemini stars:>1000"
+  ],
+  "evaluation": [
+    "agent memory benchmark long context stars:>20",
+    "LLM agent evaluation framework tool use stars:>100",
+    "multi agent benchmark reliability stars:>20"
+  ],
+  "governance": [
+    "AI agent permissions audit provenance sandbox stars:>20",
+    "prompt injection MCP security agent stars:>50",
+    "agent state merkle provenance memory stars:>10"
+  ]
+}
