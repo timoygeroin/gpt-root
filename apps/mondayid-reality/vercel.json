@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/mcp", "destination": "/api/mcp" },
+    { "source": "/health", "destination": "/api/mcp?route=health" },
+    { "source": "/", "destination": "/api/mcp?route=root" }
+  ],
+  "functions": {
+    "api/mcp.js": {
+      "includeFiles": "public/reality-widget.html",
+      "maxDuration": 30
+    }
+  }
+}
