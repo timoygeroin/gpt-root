@@ -1,0 +1,10 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+const server=readFileSync(new URL("../api/mcp.js",import.meta.url),"utf8");
+const widget=readFileSync(new URL("../public/reality-widget.html",import.meta.url),"utf8");
+const vercel=JSON.parse(readFileSync(new URL("../vercel.json",import.meta.url),"utf8"));
+test("stateless signed state exists",()=>{assert.match(server,/createHmac/);assert.match(server,/stateToken/);assert.match(server,/server.registerTool\(\"get_reality_state\"/);assert.doesNotMatch(server,/new Map\(/)});
+test("truth and live safety guardrails exist",()=>{assert.match(server,/liveSafetyAdapters:0/);assert.match(server,/SIMULATED demo only/);assert.match(server,/UNCONNECTED/)});
+test("widget uses MCP bridge and retry-safe transition",()=>{assert.match(widget,/ui\/initialize/);assert.match(widget,/transitionId/);assert.match(widget,/expectedVersion/);assert.match(widget,/stateToken:current.stateToken/)});
+test("vercel exposes root health and mcp",()=>{const src=vercel.rewrites.map(x=>x.source);assert.deepEqual(src,["/mcp","/health","/"])});
