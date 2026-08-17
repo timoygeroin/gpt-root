@@ -23,6 +23,8 @@ jobs:
         run: swift --version
       - name: Compile and test Israel Edge core
         run: swift test -v
+      - name: Sync and validate canonical alert-zone registry
+        run: bash edge/ios/sync-zone-registry.sh
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Generate iOS project
@@ -31,3 +33,25 @@ jobs:
         run: xcodebuild -project edge/ios/MondayIDReality.xcodeproj -scheme MondayIDReality -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath .build-ios CODE_SIGNING_ALLOWED=NO build
       - name: Verify app bundle exists
         run: test -d '.build-ios/Build/Products/Debug-iphonesimulator/MONDAYID REALITY.app'
+      - name: Boot visual-audit simulator
+        shell: bash
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin)["devices"]; print(next(x["udid"] for runtime in d.values() for x in runtime if x["name"].startswith("iPhone")))')
+          echo "SIM_UDID=$UDID" >> "$GITHUB_ENV"
+          xcrun simctl boot "$UDID" || true
+          xcrun simctl bootstatus "$UDID" -b
+      - name: Launch and capture visual audit
+        shell: bash
+        run: |
+          APP='.build-ios/Build/Products/Debug-iphonesimulator/MONDAYID REALITY.app'
+          xcrun simctl install "$SIM_UDID" "$APP"
+          SIMCTL_CHILD_MONDAYID_VISUAL_AUDIT=1 xcrun simctl launch "$SIM_UDID" com.mondayid.reality
+          sleep 6
+          xcrun simctl io "$SIM_UDID" screenshot visual-audit.png
+          test -s visual-audit.png
+      - name: Upload visual audit
+        uses: actions/upload-artifact@v4
+        with:
+          name: mondayid-reality-visual-audit
+          path: apps/mondayid-reality/visual-audit.png
+          if-no-files-found: error

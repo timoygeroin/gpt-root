@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <title>MONDAYID REALITY</title>
+  <style>
+    :root { color-scheme: light dark; font-family: -apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif; background: Canvas; color: CanvasText; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100svh; background: Canvas; color: CanvasText; padding: calc(env(safe-area-inset-top) + 18px) 24px calc(env(safe-area-inset-bottom) + 28px); }
+    button,input { font: inherit; } button { color: inherit; }
+    main { width:min(100%,620px); min-height:calc(100svh - 46px); margin:auto; display:flex; flex-direction:column; }
+    header { display:flex; align-items:center; gap:10px; min-height:44px; }
+    .brand { font-size:.78rem; font-weight:650; letter-spacing:.09em; opacity:.58; }
+    .spacer { flex:1; }
+    .textButton { appearance:none; border:0; background:transparent; padding:10px 0 10px 14px; font-weight:600; cursor:pointer; }
+    .state { flex:1; display:flex; flex-direction:column; justify-content:center; padding:44px 0; }
+    .glyph { width:28px; height:28px; display:grid; place-items:center; font-size:1.15rem; margin-bottom:22px; opacity:.7; }
+    h1 { margin:0; max-width:14ch; font-size:clamp(2.35rem,9vw,4.4rem); line-height:.98; letter-spacing:-.045em; font-weight:650; text-wrap:balance; }
+    .reason { margin:18px 0 0; max-width:42rem; font-size:1.05rem; line-height:1.5; opacity:.62; text-wrap:pretty; }
+    footer { border-top:1px solid color-mix(in srgb, CanvasText 14%, transparent); padding-top:14px; display:flex; align-items:center; gap:12px; font-size:.82rem; opacity:.68; }
+    dialog { width:min(calc(100% - 32px),540px); border:1px solid color-mix(in srgb, CanvasText 16%, transparent); border-radius:24px; background:Canvas; color:CanvasText; padding:0; box-shadow:0 24px 80px rgba(0,0,0,.24); }
+    dialog::backdrop { background:rgba(0,0,0,.38); backdrop-filter:blur(10px); }
+    .sheet { padding:24px; } .sheet h2 { margin:0 0 8px; font-size:1.4rem; } .sheet p { margin:0 0 22px; line-height:1.45; opacity:.62; }
+    label { display:block; margin-top:16px; font-size:.86rem; font-weight:650; }
+    input { width:100%; margin-top:7px; border:1px solid color-mix(in srgb, CanvasText 18%, transparent); border-radius:14px; background:transparent; color:inherit; padding:12px 13px; min-height:46px; }
+    .actions { display:flex; justify-content:flex-end; gap:10px; margin-top:24px; }
+    .primary { border:0; border-radius:999px; background:CanvasText; color:Canvas; padding:11px 16px; font-weight:650; }
+    .receipt { margin:0; padding:0; list-style:none; } .receipt li { display:flex; justify-content:space-between; gap:20px; padding:12px 0; border-bottom:1px solid color-mix(in srgb, CanvasText 10%, transparent); } .receipt span:last-child { text-align:end; opacity:.6; }
+    @media (prefers-reduced-motion:no-preference) { .state { transition:opacity .2s ease; } button:active { transform:scale(.985); } }
+    @media (prefers-contrast:more) { .brand,.reason,footer { opacity:.85; } }
+  </style>
+</head>
+<body>
+<main>
+  <header><div class="brand">MONDAYID REALITY</div><div class="spacer"></div><button class="textButton" id="contextsButton" type="button">Contexts</button></header>
+  <section class="state" id="state" aria-live="polite" aria-atomic="true"><div class="glyph" id="glyph" aria-hidden="true">…</div><h1 id="headline">Reading reality</h1><p class="reason" id="reason">Checking the receptor mesh.</p></section>
+  <footer><span id="observed">Not observed yet</span><div class="spacer"></div><button class="textButton" id="detailsButton" type="button">Details</button></footer>
+</main>
+<dialog id="contextsDialog"><form method="dialog" class="sheet" id="contextsForm"><h2 id="contextsTitle">Your reality</h2><p id="contextsHelp">Saved contexts remain on this device and are not sent to the cloud.</p><label>Home<input id="home" autocomplete="address-level2"></label><label>Work<input id="work" autocomplete="address-level2"></label><label>Family<input id="family" autocomplete="address-level2"></label><label>Route<input id="route" placeholder="City, City"></label><div class="actions"><button class="primary" value="default" id="saveButton">Done</button></div></form></dialog>
+<dialog id="detailsDialog"><form method="dialog" class="sheet"><h2 id="detailsTitle">Reality receipt</h2><ul class="receipt" id="receipt"></ul><p>This web surface has no authority to declare a personal physical condition. Keep the independent official alert channel enabled.</p><div class="actions"><button class="primary" value="default" id="detailsDone">Done</button></div></form></dialog>
+<script>
+const S={en:{contexts:'Contexts',reading:'Reading reality',checking:'Checking the receptor mesh.',coverage:'Coverage incomplete',coverageReason:'Authoritative local verification is unavailable on this web surface. Missing coverage is never interpreted as an all-clear signal.',observed:'Observed',details:'Details',receipt:'Reality receipt',reality:'Your reality',help:'Saved contexts remain on this device and are not sent to the cloud.',done:'Done'},ru:{contexts:'Контексты',reading:'Читаю реальность',checking:'Проверяю сеть рецепторов.',coverage:'Покрытие неполное',coverageReason:'На web-поверхности недоступна авторитетная локальная проверка. Отсутствие данных никогда не трактуется как сигнал «всё чисто».',observed:'Наблюдение',details:'Детали',receipt:'Квитанция реальности',reality:'Твоя реальность',help:'Контексты хранятся только на этом устройстве и не отправляются в облако.',done:'Готово'},he:{contexts:'הקשרים',reading:'קורא את המציאות',checking:'בודק את רשת המקורות.',coverage:'הכיסוי אינו מלא',coverageReason:'אימות סמכותי מקומי אינו זמין בממשק הווב. חוסר מידע לעולם אינו מפורש כאישור שהכול תקין.',observed:'נצפה',details:'פרטים',receipt:'קבלת מציאות',reality:'המציאות שלך',help:'ההקשרים נשמרים במכשיר הזה בלבד ואינם נשלחים לענן.',done:'סיום'},ar:{contexts:'السياقات',reading:'أقرأ الواقع',checking:'أتحقق من شبكة المصادر.',coverage:'التغطية غير مكتملة',coverageReason:'التحقق المحلي الموثوق غير متاح على واجهة الويب. غياب البيانات لا يُفسَّر أبداً كإشارة أمان.',observed:'تم الرصد',details:'التفاصيل',receipt:'إيصال الواقع',reality:'واقعك',help:'تبقى السياقات على هذا الجهاز ولا تُرسل إلى السحابة.',done:'تم'}};
+const lang=(navigator.language||'en').slice(0,2),t=S[lang]||S.en;document.documentElement.lang=lang;document.documentElement.dir=['he','ar'].includes(lang)?'rtl':'ltr';const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));$('contextsButton').textContent=t.contexts;$('detailsButton').textContent=t.details;$('contextsTitle').textContent=t.reality;$('contextsHelp').textContent=t.help;$('saveButton').textContent=t.done;$('detailsTitle').textContent=t.receipt;$('detailsDone').textContent=t.done;
+const keys=['home','work','family','route'];for(const k of keys)$(k).value=localStorage.getItem('reality.'+k)||'';
+function render(d){$('headline').textContent=t.coverage;$('reason').textContent=t.coverageReason;$('glyph').textContent='△';$('observed').textContent=t.observed+' '+new Date(d.observedAt||Date.now()).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});$('receipt').innerHTML=(d.receptors||[]).map(x=>`<li><span>${esc(x.label||x.id)}</span><span>${esc(x.transport)} · ${esc(x.authority)}</span></li>`).join('');}
+async function refresh(){try{const res=await fetch('/api/state',{cache:'no-store'});if(!res.ok)throw new Error('transport');render(await res.json());}catch{$('headline').textContent=t.coverage;$('reason').textContent=t.coverageReason;$('glyph').textContent='△';}}
+$('contextsButton').onclick=()=>$('contextsDialog').showModal();$('detailsButton').onclick=()=>$('detailsDialog').showModal();$('contextsForm').addEventListener('submit',()=>{for(const k of keys)localStorage.setItem('reality.'+k,$(k).value.trim());});if(!keys.some(k=>localStorage.getItem('reality.'+k)))$('contextsDialog').showModal();refresh();setInterval(refresh,15000);if('serviceWorker'in navigator)navigator.serviceWorker.register('/service-worker.js').catch(()=>{});
+</script>
+</body></html>

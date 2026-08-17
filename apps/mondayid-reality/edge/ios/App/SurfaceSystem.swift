@@ -9,6 +9,7 @@ enum RealitySurfacePhase: Equatable {
     case unchanged
     case coverageIncomplete
     case active
+    case activeUnverified
     case resolved
 }
 
@@ -22,13 +23,10 @@ struct SurfacePalette {
     static func palette(for phase: RealitySurfacePhase, contrast: AccessibilityContrast) -> SurfacePalette {
         let primary = Color.primary
         let secondary = Color.secondary
-
         switch phase {
-        case .active:
+        case .active, .activeUnverified:
             return SurfacePalette(background: Color(uiColor: .systemBackground), primary: primary, secondary: secondary, accent: .red, material: contrast == .increased ? .regularMaterial : .ultraThinMaterial)
-        case .coverageIncomplete:
-            return SurfacePalette(background: Color(uiColor: .systemBackground), primary: primary, secondary: secondary, accent: .yellow, material: contrast == .increased ? .regularMaterial : .ultraThinMaterial)
-        case .resolved, .loading, .unchanged:
+        case .coverageIncomplete, .resolved, .loading, .unchanged:
             return SurfacePalette(background: Color(uiColor: .systemBackground), primary: primary, secondary: secondary, accent: .secondary, material: contrast == .increased ? .regularMaterial : .ultraThinMaterial)
         }
     }
@@ -44,7 +42,7 @@ struct StateGlyph: View {
             .symbolRenderingMode(.monochrome)
             .accessibilityHidden(true)
             .overlay {
-                if differentiateWithoutColor && phase == .active {
+                if differentiateWithoutColor && (phase == .active || phase == .activeUnverified) {
                     Circle().stroke(lineWidth: 2).padding(-5)
                 }
             }
@@ -54,8 +52,9 @@ struct StateGlyph: View {
         switch phase {
         case .loading: return "ellipsis"
         case .unchanged: return "minus"
-        case .coverageIncomplete: return "exclamationmark.triangle.fill"
+        case .coverageIncomplete: return "exclamationmark.triangle"
         case .active: return "exclamationmark.octagon.fill"
+        case .activeUnverified: return "exclamationmark.octagon"
         case .resolved: return "checkmark"
         }
     }

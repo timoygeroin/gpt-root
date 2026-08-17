@@ -3,36 +3,58 @@ import SwiftUI
 
 @MainActor
 final class RealityViewModel: ObservableObject {
-    @Published var tick: EdgeRuntime.Tick?
-    @Published var isRefreshing = false
+    @Published private(set) var tick: EdgeRuntime.Tick?
+    @Published private(set) var isRefreshing = false
+    @Published private(set) var lastObservedAt: Date?
 
     private let runtime = EdgeRuntime()
     private var refreshTask: Task<Void, Never>?
+    private var profile = PersonalProfile(homeAreas: [], workAreas: [], familyAreas: [], routeAreas: [])
 
-    let profile = PersonalProfile(
-        homeAreas: ["Nahariya"],
-        workAreas: ["Haifa"],
-        familyAreas: ["Nahariya"],
-        routeAreas: ["Nahariya", "Haifa"]
-    )
+    var phase: RealitySurfacePhase {
+        guard let tick else { return .loading }
+        if tick.lifecycle == "RESOLVED_FROM_VIEW" { return .resolved }
+        switch tick.reality.state {
+        case .officialActive: return .active
+        case .retainedActiveDuringCoverageGap: return .activeUnverified
+        case .coverageIncomplete: return .coverageIncomplete
+        case .officialObservedNoActiveItems: return .unchanged
+        }
+    }
 
     var headline: String {
-        guard let tick else { return "Reading reality…" }
-        switch tick.reality.state {
-        case .officialActive: return "Your reality changed."
-        case .coverageIncomplete: return "Coverage incomplete."
-        case .officialObservedNoActiveItems: return "No relevant active item observed."
+        switch phase {
+        case .loading: return String(localized: "Reading reality")
+        case .unchanged: return String(localized: "No relevant change observed")
+        case .coverageIncomplete: return String(localized: "Coverage incomplete")
+        case .active: return String(localized: "Your reality changed")
+        case .activeUnverified: return String(localized: "Active state not yet cleared")
+        case .resolved: return String(localized: "Relevant item no longer observed")
         }
     }
 
-    var accent: Color {
-        guard let tick else { return .secondary }
-        switch tick.reality.state {
-        case .officialActive: return .red
-        case .coverageIncomplete: return .orange
-        case .officialObservedNoActiveItems: return .secondary
+    var explanation: String {
+        guard tick != nil else { return String(localized: "Checking the official-origin foreground receptor.") }
+        switch phase {
+        case .loading:
+            return String(localized: "Checking the official-origin foreground receptor.")
+        case .unchanged:
+            return String(localized: "No active official item was observed for your saved contexts in this foreground check.")
+        case .coverageIncomplete:
+            return String(localized: "The foreground official-origin check is incomplete. No conclusion is derived from missing coverage.")
+        case .active:
+            return String(localized: "An official-origin active item intersects a saved personal context.")
+        case .activeUnverified:
+            return String(localized: "Foreground coverage was lost after an active official-origin observation. The last active state remains visible until an authoritative observation clears or changes it.")
+        case .resolved:
+            return String(localized: "The previously relevant item is no longer present in the current foreground observation.")
         }
     }
+
+    var affectedContexts: [String] { tick?.reality.affectedContexts ?? [] }
+    var relevantAlerts: [OrefAlert] { tick?.reality.relevantAlerts ?? [] }
+
+    func setProfile(_ newProfile: PersonalProfile) { profile = newProfile }
 
     func start() {
         guard refreshTask == nil else { return }
@@ -54,5 +76,6 @@ final class RealityViewModel: ObservableObject {
         isRefreshing = true
         defer { isRefreshing = false }
         tick = await runtime.tick(profile: profile)
+        lastObservedAt = Date()
     }
 }
