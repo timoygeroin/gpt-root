@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+import assert from 'node:assert/strict';
+const html=fs.readFileSync(new URL('./index.html',import.meta.url),'utf8');
+assert(!/saved=.*route=|URLSearchParams\(\{saved/.test(html),'Personal contexts must never be sent to cloud URLs.');
+assert(!/on(?:touch|pointer)(?:start|move|end)=/i.test(html),'No custom gesture contract on the primary surface.');
+assert(!/you are safe|you.re safe|all safe|person is safe/i.test(html),'No personal physical-condition claim.');
+assert(html.includes('prefers-reduced-motion'),'Reduced Motion must be respected.');
+assert(html.includes('prefers-contrast'),'Increased contrast must be respected.');
+assert(html.includes("['he','ar'].includes(lang)?'rtl':'ltr'"),'RTL must remain explicit for Hebrew and Arabic.');
+assert(html.includes('DEVICE_LOCAL_ONLY')===false,'Implementation detail should not leak into primary UI copy.');
+const fixedFontPx=[...html.matchAll(/font-size:\s*([0-9.]+)px/g)].map(m=>Number(m[1]));
+assert(fixedFontPx.every(x=>x>=11),'Fixed text under 11px is forbidden.');
+console.log('web surface constitution: PASS');
