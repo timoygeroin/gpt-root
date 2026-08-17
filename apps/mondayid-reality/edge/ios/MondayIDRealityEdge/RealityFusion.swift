@@ -35,7 +35,7 @@ public enum RealityFusion {
         guard official.coverage == .reachable else {
             return LocalReality(state: .coverageIncomplete, relevantAlerts: [], affectedContexts: [],
                                 action: "KEEP_OFFICIAL_ALERTS_ENABLED",
-                                reason: "Official receptor coverage is incomplete; absence of data is not safety.")
+                                reason: "Official receptor coverage is incomplete; no personal-condition conclusion may be derived from missing data.")
         }
 
         let normalizedProfile = Set(profile.allAreas.map(normalize))
@@ -46,7 +46,7 @@ public enum RealityFusion {
         if relevant.isEmpty {
             return LocalReality(state: .officialObservedNoActiveItems, relevantAlerts: [], affectedContexts: [],
                                 action: "NONE_FROM_RUNTIME",
-                                reason: "No active official item was observed for saved contexts in this poll. This is not a declaration that the person is safe.")
+                                reason: "No active official item was observed for saved contexts in this poll. This observation does not describe the person's physical condition.")
         }
 
         var contexts = Set<String>()
