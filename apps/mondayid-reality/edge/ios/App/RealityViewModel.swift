@@ -16,6 +16,7 @@ final class RealityViewModel: ObservableObject {
         if tick.lifecycle == "RESOLVED_FROM_VIEW" { return .resolved }
         switch tick.reality.state {
         case .officialActive: return .active
+        case .retainedActiveDuringCoverageGap: return .activeUnverified
         case .coverageIncomplete: return .coverageIncomplete
         case .officialObservedNoActiveItems: return .unchanged
         }
@@ -27,6 +28,7 @@ final class RealityViewModel: ObservableObject {
         case .unchanged: return String(localized: "No relevant change observed")
         case .coverageIncomplete: return String(localized: "Coverage incomplete")
         case .active: return String(localized: "Your reality changed")
+        case .activeUnverified: return String(localized: "Active state not yet cleared")
         case .resolved: return String(localized: "Relevant item no longer observed")
         }
     }
@@ -42,6 +44,8 @@ final class RealityViewModel: ObservableObject {
             return String(localized: "The foreground official-origin check is incomplete. No conclusion is derived from missing coverage.")
         case .active:
             return String(localized: "An official-origin active item intersects a saved personal context.")
+        case .activeUnverified:
+            return String(localized: "Foreground coverage was lost after an active official-origin observation. The last active state remains visible until an authoritative observation clears or changes it.")
         case .resolved:
             return String(localized: "The previously relevant item is no longer present in the current foreground observation.")
         }
