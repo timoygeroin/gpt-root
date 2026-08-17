@@ -23,36 +23,34 @@ final class RealityViewModel: ObservableObject {
 
     var headline: String {
         switch phase {
-        case .loading: return "Reading reality"
-        case .unchanged: return "Nothing relevant changed"
-        case .coverageIncomplete: return "Coverage incomplete"
-        case .active: return "Your reality changed"
-        case .resolved: return "The active item left your view"
+        case .loading: return String(localized: "Reading reality")
+        case .unchanged: return String(localized: "No relevant change observed")
+        case .coverageIncomplete: return String(localized: "Coverage incomplete")
+        case .active: return String(localized: "Your reality changed")
+        case .resolved: return String(localized: "Relevant item no longer observed")
         }
     }
 
     var explanation: String {
-        guard let tick else { return "Checking the official-origin foreground receptor." }
+        guard tick != nil else { return String(localized: "Checking the official-origin foreground receptor.") }
         switch phase {
         case .loading:
-            return "Checking the official-origin foreground receptor."
+            return String(localized: "Checking the official-origin foreground receptor.")
         case .unchanged:
-            return "No active official item was observed for your saved contexts in this foreground check."
+            return String(localized: "No active official item was observed for your saved contexts in this foreground check.")
         case .coverageIncomplete:
-            return "The foreground official-origin check is incomplete. No conclusion is derived from missing coverage."
+            return String(localized: "The foreground official-origin check is incomplete. No conclusion is derived from missing coverage.")
         case .active:
-            return tick.reality.reason
+            return String(localized: "An official-origin active item intersects a saved personal context.")
         case .resolved:
-            return "The previously relevant item is no longer present in the current foreground observation."
+            return String(localized: "The previously relevant item is no longer present in the current foreground observation.")
         }
     }
 
     var affectedContexts: [String] { tick?.reality.affectedContexts ?? [] }
     var relevantAlerts: [OrefAlert] { tick?.reality.relevantAlerts ?? [] }
 
-    func setProfile(_ newProfile: PersonalProfile) {
-        profile = newProfile
-    }
+    func setProfile(_ newProfile: PersonalProfile) { profile = newProfile }
 
     func start() {
         guard refreshTask == nil else { return }
