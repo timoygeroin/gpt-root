@@ -4,13 +4,15 @@ on:
     paths:
       - 'apps/mondayid-reality/edge/ios/**'
       - 'apps/mondayid-reality/Package.swift'
+      - '.github/workflows/mondayid-reality-ios-edge.yml'
   push:
     branches: [main]
     paths:
       - 'apps/mondayid-reality/edge/ios/**'
       - 'apps/mondayid-reality/Package.swift'
+      - '.github/workflows/mondayid-reality-ios-edge.yml'
 jobs:
-  swift-test:
+  swift-test-and-ios-build:
     runs-on: macos-15
     defaults:
       run:
@@ -21,3 +23,11 @@ jobs:
         run: swift --version
       - name: Compile and test Israel Edge core
         run: swift test -v
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Generate iOS project
+        run: xcodegen generate --spec edge/ios/project.yml
+      - name: Build unsigned iOS Simulator app
+        run: xcodebuild -project edge/ios/MondayIDReality.xcodeproj -scheme MondayIDReality -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' -derivedDataPath .build-ios CODE_SIGNING_ALLOWED=NO build
+      - name: Verify app bundle exists
+        run: test -d '.build-ios/Build/Products/Debug-iphonesimulator/MONDAYID REALITY.app'
