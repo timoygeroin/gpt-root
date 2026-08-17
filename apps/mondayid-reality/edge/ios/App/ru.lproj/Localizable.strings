@@ -2,11 +2,13 @@
 "No relevant change observed" = "Значимых изменений не наблюдается";
 "Coverage incomplete" = "Покрытие неполное";
 "Your reality changed" = "Твоя реальность изменилась";
+"Active state not yet cleared" = "Активное состояние ещё не снято";
 "Relevant item no longer observed" = "Релевантное событие больше не наблюдается";
 "Checking the official-origin foreground receptor." = "Проверяю локальный рецептор официального источника.";
 "No active official item was observed for your saved contexts in this foreground check." = "В этой локальной проверке не наблюдалось активного официального события, относящегося к твоим сохранённым контекстам.";
 "The foreground official-origin check is incomplete. No conclusion is derived from missing coverage." = "Локальная проверка официального источника неполна. Из отсутствующих данных вывод не делается.";
 "An official-origin active item intersects a saved personal context." = "Активное событие официального источника пересекается с сохранённым личным контекстом.";
+"Foreground coverage was lost after an active official-origin observation. The last active state remains visible until an authoritative observation clears or changes it." = "После активного наблюдения официального источника локальное покрытие пропало. Последнее активное состояние остаётся видимым, пока авторитетное наблюдение не снимет или не изменит его.";
 "The previously relevant item is no longer present in the current foreground observation." = "Ранее релевантное событие больше не присутствует в текущем локальном наблюдении.";
 "Contexts" = "Контексты";
 "Details" = "Детали";
@@ -24,6 +26,8 @@
 "Saved contexts stay on this device in this prototype. Separate multiple areas with commas. The app uses them only to decide whether an observed item intersects your reality." = "Сохранённые контексты остаются на этом устройстве. Несколько районов разделяй запятыми. Приложение использует их только для определения того, пересекается ли наблюдаемое событие с твоей реальностью.";
 "iOS does not guarantee continuous background polling. Keep the current Home Front Command alert channel enabled. MONDAYID REALITY verifies and personalizes official-origin observations while active; it does not replace the authority channel." = "iOS не гарантирует непрерывный фоновый опрос. Оставь включённым действующий канал оповещений Пикуд а-Ореф. MONDAYID REALITY проверяет и персонализирует наблюдения официального источника, пока активно, но не заменяет авторитетный канал.";
 "Official-origin active item" = "Активное событие официального источника";
+"Last confirmed official-origin active item" = "Последнее подтверждённое активное событие официального источника";
+"Foreground coverage is currently unavailable. Verify the current official channel; this last confirmed active state remains visible until an authoritative observation clears or changes it." = "Локальное покрытие сейчас недоступно. Проверь актуальный официальный канал; последнее подтверждённое активное состояние остаётся видимым, пока авторитетное наблюдение не снимет или не изменит его.";
 "Foreground verification unavailable" = "Локальная проверка недоступна";
 "Keep the independent official alert channel enabled. Missing transport is treated as missing knowledge, never as an all-clear signal." = "Оставь независимый официальный канал оповещений включённым. Недоступный транспорт считается отсутствием знания, а не сигналом «всё чисто».";
 "Changed since the previous observation" = "Изменилось с прошлого наблюдения";
