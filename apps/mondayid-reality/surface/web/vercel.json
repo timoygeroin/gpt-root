@@ -1,0 +1,1 @@
+{"version":2,"functions":{"api/state.js":{"runtime":"nodejs20.x"}},"rewrites":[{"source":"/api/state","destination":"/api/state.js"}],"headers":[{"source":"/(.*)","headers":[{"key":"X-Content-Type-Options","value":"nosniff"},{"key":"Referrer-Policy","value":"no-referrer"},{"key":"Permissions-Policy","value":"geolocation=(), microphone=(), camera=()"}]}]}
