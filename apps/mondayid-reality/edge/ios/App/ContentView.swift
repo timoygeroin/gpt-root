@@ -2,94 +2,258 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var model = RealityViewModel()
+    @StateObject private var profile = ProfileStore()
+    @State private var showContexts = false
+    @State private var showDetails = false
+
+    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.accessibilityContrast) private var accessibilityContrast
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private var palette: SurfacePalette {
+        SurfacePalette.palette(for: model.phase, contrast: accessibilityContrast)
+    }
 
     var body: some View {
-        ZStack {
-            Color(red: 0.035, green: 0.039, blue: 0.047).ignoresSafeArea()
-            ScrollView {
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("MONDAYID REALITY · LOCAL AUTHORITY")
-                        .font(.system(size: 10, weight: .bold))
-                        .tracking(2.2)
-                        .foregroundStyle(.secondary)
+        NavigationStack {
+            ZStack {
+                palette.background.ignoresSafeArea()
 
-                    Text(model.headline)
-                        .font(.system(size: 42, weight: .semibold, design: .default))
-                        .tracking(-1.7)
-                        .foregroundStyle(model.accent)
-                        .padding(.top, 46)
-
-                    if let tick = model.tick {
-                        Text(tick.reality.reason)
-                            .font(.system(size: 15))
-                            .foregroundStyle(.secondary)
-                            .padding(.top, 14)
-
-                        HStack(spacing: 8) {
-                            context("Home", "Nahariya")
-                            context("Work", "Haifa")
-                        }.padding(.top, 26)
-                        HStack(spacing: 8) {
-                            context("Family", "Nahariya")
-                            context("Route", "Nahariya → Haifa")
-                        }.padding(.top, 8)
-
-                        VStack(spacing: 0) {
-                            row("Official-origin receptor", tick.official.coverage.rawValue)
-                            row("Lifecycle", tick.lifecycle)
-                            row("Authority", tick.reality.state.rawValue)
-                        }
-                        .padding(.top, 30)
-
-                        if tick.reality.state == .officialActive {
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text("CURRENT OFFICIAL INSTRUCTION")
-                                    .font(.system(size: 10, weight: .bold))
-                                    .tracking(1.6)
-                                    .foregroundStyle(.red)
-                                ForEach(tick.reality.relevantAlerts, id: \.self) { alert in
-                                    Text(alert.instruction.isEmpty ? alert.title : alert.instruction)
-                                        .font(.system(size: 20, weight: .semibold))
-                                }
-                            }
-                            .padding(20)
-                            .background(Color.red.opacity(0.10), in: RoundedRectangle(cornerRadius: 24))
-                            .padding(.top, 24)
-                        }
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        statusHeader
+                        Spacer(minLength: 54)
+                        stateSurface
+                        Spacer(minLength: 48)
+                        receipt
                     }
-
-                    Text("This app describes official-origin observations for saved contexts. It does not infer a person's physical condition. Keep current Home Front Command alerts and instructions enabled.")
-                        .font(.system(size: 11))
-                        .foregroundStyle(Color.secondary.opacity(0.72))
-                        .padding(.top, 34)
-                        .padding(.bottom, 32)
+                    .frame(maxWidth: 620, minHeight: 660, alignment: .topLeading)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 18)
+                    .frame(maxWidth: .infinity)
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 20)
+                .refreshable { await model.refresh() }
             }
-            .refreshable { await model.refresh() }
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Contexts") { showContexts = true }
+                        .buttonStyle(PressFeedbackStyle())
+                }
+            }
+            .toolbarBackground(.hidden, for: .navigationBar)
         }
-        .task { model.start() }
-        .onDisappear { model.stop() }
+        .sheet(isPresented: $showContexts) {
+            ProfileEditorView(profile: profile)
+        }
+        .sheet(isPresented: $showDetails) {
+            DetailsView(model: model, profile: profile)
+        }
+        .task {
+            syncProfile()
+            if !profile.hasCompletedSetup || !profile.hasAnyArea {
+                showContexts = true
+            }
+            if scenePhase == .active && profile.hasAnyArea {
+                model.start()
+            }
+        }
+        .onChange(of: scenePhase) { _, newValue in
+            if newValue == .active && profile.hasAnyArea {
+                syncProfile()
+                model.start()
+            } else {
+                model.stop()
+            }
+        }
+        .onChange(of: profile.home) { _, _ in syncProfile() }
+        .onChange(of: profile.work) { _, _ in syncProfile() }
+        .onChange(of: profile.family) { _, _ in syncProfile() }
+        .onChange(of: profile.route) { _, _ in syncProfile() }
+        .onChange(of: profile.hasCompletedSetup) { _, completed in
+            syncProfile()
+            if completed && profile.hasAnyArea && scenePhase == .active { model.start() }
+        }
+        .animation(reduceMotion ? nil : .smooth(duration: 0.28), value: model.phase)
     }
 
-    private func context(_ name: String, _ area: String) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
-            Text(name).font(.system(size: 12, weight: .semibold))
-            Text(area).font(.system(size: 11)).foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(14)
-        .background(Color.white.opacity(0.035), in: RoundedRectangle(cornerRadius: 18))
-    }
-
-    private func row(_ name: String, _ value: String) -> some View {
-        HStack {
-            Text(name).font(.system(size: 14))
+    private var statusHeader: some View {
+        HStack(spacing: 10) {
+            Text("MONDAYID REALITY")
+                .font(.caption.weight(.semibold))
+                .tracking(1.1)
+                .foregroundStyle(.secondary)
             Spacer()
-            Text(value).font(.system(size: 11, weight: .semibold)).foregroundStyle(.secondary)
+            StateGlyph(phase: model.phase)
+                .foregroundStyle(palette.accent)
         }
-        .padding(.vertical, 15)
-        .overlay(alignment: .bottom) { Divider().opacity(0.35) }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("MondayID Reality, \(model.headline)")
+    }
+
+    private var stateSurface: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Text(model.headline)
+                .font(.largeTitle.weight(.semibold))
+                .foregroundStyle(palette.primary)
+                .contentTransition(.interpolate)
+                .accessibilityAddTraits(.isHeader)
+
+            Text(model.explanation)
+                .font(.body)
+                .foregroundStyle(palette.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+
+            if model.phase == .active {
+                activeInstruction
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            } else if model.phase == .coverageIncomplete {
+                coverageNotice
+                    .transition(.opacity)
+            } else if model.phase == .resolved {
+                resolvedNotice
+                    .transition(.opacity)
+            }
+        }
+    }
+
+    private var activeInstruction: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            Label("Official-origin active item", systemImage: "exclamationmark.octagon.fill")
+                .font(.headline)
+                .foregroundStyle(.red)
+
+            if !model.affectedContexts.isEmpty {
+                Text(model.affectedContexts.joined(separator: " · "))
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
+
+            ForEach(model.relevantAlerts, id: \.sourceEventId) { alert in
+                VStack(alignment: .leading, spacing: 8) {
+                    if !alert.title.isEmpty {
+                        Text(alert.title)
+                            .font(.title3.weight(.semibold))
+                    }
+                    if !alert.instruction.isEmpty {
+                        Text(alert.instruction)
+                            .font(.title2.weight(.semibold))
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                .accessibilityElement(children: .combine)
+            }
+
+            Text("Follow the current official Home Front Command instruction. This app adds personal relevance; it does not replace the official alert channel.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 22)
+        .padding(.horizontal, 20)
+        .background(palette.material, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: 26, style: .continuous)
+                .strokeBorder(Color.red.opacity(accessibilityContrast == .increased ? 0.75 : 0.34))
+        }
+        .accessibilityElement(children: .contain)
+    }
+
+    private var coverageNotice: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("Foreground verification unavailable", systemImage: "exclamationmark.triangle.fill")
+                .font(.headline)
+                .foregroundStyle(.yellow)
+            Text("Keep the independent official alert channel enabled. Missing transport is treated as missing knowledge, never as an all-clear signal.")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 18)
+        .accessibilityElement(children: .combine)
+    }
+
+    private var resolvedNotice: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Changed since the previous observation")
+                .font(.headline)
+            Text("A previously relevant active item is no longer present in the current foreground observation. Continue to follow current official instructions.")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 18)
+    }
+
+    private var receipt: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Divider()
+            HStack(alignment: .firstTextBaseline) {
+                if let lastObservedAt = model.lastObservedAt {
+                    Text("Observed \(lastObservedAt, style: .relative) ago")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("Foreground observation not yet completed")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+                Spacer()
+                Button("Details") { showDetails = true }
+                    .font(.footnote.weight(.semibold))
+                    .buttonStyle(PressFeedbackStyle())
+            }
+        }
+    }
+
+    private func syncProfile() {
+        model.setProfile(profile.profile)
+    }
+}
+
+private struct DetailsView: View {
+    @ObservedObject var model: RealityViewModel
+    @ObservedObject var profile: ProfileStore
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section("Observation") {
+                    LabeledContent("Surface phase", value: phaseLabel)
+                    if let tick = model.tick {
+                        LabeledContent("Authority state", value: tick.reality.state.rawValue)
+                        LabeledContent("Lifecycle", value: tick.lifecycle)
+                        LabeledContent("Foreground transport", value: tick.official.coverage.rawValue)
+                    }
+                }
+
+                Section("Saved contexts") {
+                    ForEach(Array(profile.contexts.enumerated()), id: \.offset) { _, context in
+                        LabeledContent(context.0, value: context.1)
+                    }
+                }
+
+                Section("System contract") {
+                    Text("The foreground local receptor may verify official-origin observations and compute personal relevance. iOS does not guarantee continuous background polling, so the independent official alert channel remains the authority path when this app is suspended.")
+                    Text("Missing data never becomes a personal-condition claim. Cloud context and secondary sources cannot override an official-origin active state.")
+                }
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            }
+            .navigationTitle("Reality receipt")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+    }
+
+    private var phaseLabel: String {
+        switch model.phase {
+        case .loading: return "LOADING"
+        case .unchanged: return "UNCHANGED"
+        case .coverageIncomplete: return "COVERAGE_INCOMPLETE"
+        case .active: return "ACTIVE"
+        case .resolved: return "RESOLVED_FROM_VIEW"
+        }
     }
 }
