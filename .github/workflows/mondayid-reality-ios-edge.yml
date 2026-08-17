@@ -23,6 +23,8 @@ jobs:
         run: swift --version
       - name: Compile and test Israel Edge core
         run: swift test -v
+      - name: Sync and validate canonical alert-zone registry
+        run: bash edge/ios/sync-zone-registry.sh
       - name: Install XcodeGen
         run: brew install xcodegen
       - name: Generate iOS project
