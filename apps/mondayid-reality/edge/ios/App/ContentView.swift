@@ -18,7 +18,6 @@ struct ContentView: View {
         NavigationStack {
             ZStack {
                 palette.background.ignoresSafeArea()
-
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
                         statusHeader
@@ -42,20 +41,12 @@ struct ContentView: View {
             }
             .toolbarBackground(.hidden, for: .navigationBar)
         }
-        .sheet(isPresented: $showContexts) {
-            ProfileEditorView(profile: profile)
-        }
-        .sheet(isPresented: $showDetails) {
-            DetailsView(model: model, profile: profile)
-        }
+        .sheet(isPresented: $showContexts) { ProfileEditorView(profile: profile) }
+        .sheet(isPresented: $showDetails) { DetailsView(model: model, profile: profile) }
         .task {
             syncProfile()
-            if !profile.hasCompletedSetup || !profile.hasAnyArea {
-                showContexts = true
-            }
-            if scenePhase == .active && profile.hasAnyArea {
-                model.start()
-            }
+            if !profile.hasCompletedSetup || !profile.hasAnyArea { showContexts = true }
+            if scenePhase == .active && profile.hasAnyArea { model.start() }
         }
         .onChange(of: scenePhase) { _, newValue in
             if newValue == .active && profile.hasAnyArea {
@@ -104,20 +95,18 @@ struct ContentView: View {
                 .fixedSize(horizontal: false, vertical: true)
 
             if model.phase == .active {
-                activeInstruction
-                    .transition(.opacity.combined(with: .move(edge: .top)))
+                activeInstruction.transition(.opacity.combined(with: .move(edge: .top)))
             } else if model.phase == .coverageIncomplete {
-                coverageNotice
-                    .transition(.opacity)
+                coverageNotice.transition(.opacity)
             } else if model.phase == .resolved {
-                resolvedNotice
-                    .transition(.opacity)
+                resolvedNotice.transition(.opacity)
             }
         }
     }
 
     private var activeInstruction: some View {
         VStack(alignment: .leading, spacing: 18) {
+            Divider()
             Label("Official-origin active item", systemImage: "exclamationmark.octagon.fill")
                 .font(.headline)
                 .foregroundStyle(.red)
@@ -131,8 +120,7 @@ struct ContentView: View {
             ForEach(model.relevantAlerts, id: \.sourceEventId) { alert in
                 VStack(alignment: .leading, spacing: 8) {
                     if !alert.title.isEmpty {
-                        Text(alert.title)
-                            .font(.title3.weight(.semibold))
+                        Text(alert.title).font(.title3.weight(.semibold))
                     }
                     if !alert.instruction.isEmpty {
                         Text(alert.instruction)
@@ -146,22 +134,17 @@ struct ContentView: View {
             Text("Follow the current official Home Front Command instruction. This app adds personal relevance; it does not replace the official alert channel.")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
+            Divider()
         }
-        .padding(.vertical, 22)
-        .padding(.horizontal, 20)
-        .background(palette.material, in: RoundedRectangle(cornerRadius: 26, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 26, style: .continuous)
-                .strokeBorder(Color.red.opacity(accessibilityContrast == .increased ? 0.75 : 0.34))
-        }
+        .padding(.vertical, 12)
         .accessibilityElement(children: .contain)
     }
 
     private var coverageNotice: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Label("Foreground verification unavailable", systemImage: "exclamationmark.triangle.fill")
+            Label("Foreground verification unavailable", systemImage: "exclamationmark.triangle")
                 .font(.headline)
-                .foregroundStyle(.yellow)
+                .foregroundStyle(.primary)
             Text("Keep the independent official alert channel enabled. Missing transport is treated as missing knowledge, never as an all-clear signal.")
                 .font(.callout)
                 .foregroundStyle(.secondary)
@@ -172,8 +155,7 @@ struct ContentView: View {
 
     private var resolvedNotice: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Changed since the previous observation")
-                .font(.headline)
+            Text("Changed since the previous observation").font(.headline)
             Text("A previously relevant active item is no longer present in the current foreground observation. Continue to follow current official instructions.")
                 .font(.callout)
                 .foregroundStyle(.secondary)
@@ -202,9 +184,7 @@ struct ContentView: View {
         }
     }
 
-    private func syncProfile() {
-        model.setProfile(profile.profile)
-    }
+    private func syncProfile() { model.setProfile(profile.profile) }
 }
 
 private struct DetailsView: View {
@@ -223,13 +203,11 @@ private struct DetailsView: View {
                         LabeledContent("Foreground transport", value: tick.official.coverage.rawValue)
                     }
                 }
-
                 Section("Saved contexts") {
                     ForEach(Array(profile.contexts.enumerated()), id: \.offset) { _, context in
                         LabeledContent(context.0, value: context.1)
                     }
                 }
-
                 Section("System contract") {
                     Text("The foreground local receptor may verify official-origin observations and compute personal relevance. iOS does not guarantee continuous background polling, so the independent official alert channel remains the authority path when this app is suspended.")
                     Text("Missing data never becomes a personal-condition claim. Cloud context and secondary sources cannot override an official-origin active state.")
@@ -239,11 +217,7 @@ private struct DetailsView: View {
             }
             .navigationTitle("Reality receipt")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") { dismiss() }
-                }
-            }
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
         }
     }
 
