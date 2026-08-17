@@ -1,0 +1,23 @@
+name: MondayID Reality Web Surface
+on:
+  pull_request:
+    paths:
+      - 'apps/mondayid-reality/surface/web/**'
+      - '.github/workflows/mondayid-reality-web.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mondayid-reality/surface/web/**'
+      - '.github/workflows/mondayid-reality-web.yml'
+jobs:
+  surface-constitution:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mondayid-reality/surface/web
+    steps:
+      - uses: actions/checkout@v4
+      - name: Surface constitution
+        run: node surface.test.mjs
+      - name: JavaScript syntax
+        run: node --check api/state.js
