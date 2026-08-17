@@ -1,0 +1,23 @@
+name: MondayID Reality iOS Edge
+on:
+  pull_request:
+    paths:
+      - 'apps/mondayid-reality/edge/ios/**'
+      - 'apps/mondayid-reality/Package.swift'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mondayid-reality/edge/ios/**'
+      - 'apps/mondayid-reality/Package.swift'
+jobs:
+  swift-test:
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: apps/mondayid-reality
+    steps:
+      - uses: actions/checkout@v4
+      - name: Swift version
+        run: swift --version
+      - name: Compile and test Israel Edge core
+        run: swift test -v
