@@ -2,13 +2,20 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var model = RealityViewModel()
-    @StateObject private var profile = ProfileStore()
+    @StateObject private var registry: ZoneRegistry
+    @StateObject private var profile: ProfileStore
     @State private var showContexts = false
     @State private var showDetails = false
 
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.accessibilityContrast) private var accessibilityContrast
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    init() {
+        let registry = ZoneRegistry()
+        _registry = StateObject(wrappedValue: registry)
+        _profile = StateObject(wrappedValue: ProfileStore(registry: registry))
+    }
 
     private var palette: SurfacePalette {
         SurfacePalette.palette(for: model.phase, contrast: accessibilityContrast)
@@ -41,28 +48,28 @@ struct ContentView: View {
             }
             .toolbarBackground(.hidden, for: .navigationBar)
         }
-        .sheet(isPresented: $showContexts) { ProfileEditorView(profile: profile) }
-        .sheet(isPresented: $showDetails) { DetailsView(model: model, profile: profile) }
+        .sheet(isPresented: $showContexts) { ProfileEditorView(profile: profile, registry: registry) }
+        .sheet(isPresented: $showDetails) { DetailsView(model: model, profile: profile, registry: registry) }
         .task {
             syncProfile()
-            if !profile.hasCompletedSetup || !profile.hasAnyArea { showContexts = true }
-            if scenePhase == .active && profile.hasAnyArea { model.start() }
+            if !profile.hasCompletedSetup || !profile.hasAnyArea || registry.loadFailure != nil { showContexts = true }
+            if scenePhase == .active && profile.hasAnyArea && registry.loadFailure == nil { model.start() }
         }
         .onChange(of: scenePhase) { _, newValue in
-            if newValue == .active && profile.hasAnyArea {
+            if newValue == .active && profile.hasAnyArea && registry.loadFailure == nil {
                 syncProfile()
                 model.start()
             } else {
                 model.stop()
             }
         }
-        .onChange(of: profile.home) { _, _ in syncProfile() }
-        .onChange(of: profile.work) { _, _ in syncProfile() }
-        .onChange(of: profile.family) { _, _ in syncProfile() }
-        .onChange(of: profile.route) { _, _ in syncProfile() }
+        .onChange(of: profile.homeIDs) { _, _ in syncProfile() }
+        .onChange(of: profile.workIDs) { _, _ in syncProfile() }
+        .onChange(of: profile.familyIDs) { _, _ in syncProfile() }
+        .onChange(of: profile.routeIDs) { _, _ in syncProfile() }
         .onChange(of: profile.hasCompletedSetup) { _, completed in
             syncProfile()
-            if completed && profile.hasAnyArea && scenePhase == .active { model.start() }
+            if completed && profile.hasAnyArea && registry.loadFailure == nil && scenePhase == .active { model.start() }
         }
         .animation(reduceMotion ? nil : .smooth(duration: 0.28), value: model.phase)
     }
@@ -83,23 +90,25 @@ struct ContentView: View {
 
     private var stateSurface: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text(model.headline)
+            Text(registry.loadFailure == nil ? model.headline : String(localized: "Zone registry unavailable"))
                 .font(.largeTitle.weight(.semibold))
                 .foregroundStyle(palette.primary)
                 .contentTransition(.interpolate)
                 .accessibilityAddTraits(.isHeader)
 
-            Text(model.explanation)
+            Text(registry.loadFailure == nil ? model.explanation : String(localized: "Personal relevance is paused because the alert-zone registry failed validation."))
                 .font(.body)
                 .foregroundStyle(palette.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            if model.phase == .active || model.phase == .activeUnverified {
-                activeInstruction.transition(.opacity.combined(with: .move(edge: .top)))
-            } else if model.phase == .coverageIncomplete {
-                coverageNotice.transition(.opacity)
-            } else if model.phase == .resolved {
-                resolvedNotice.transition(.opacity)
+            if registry.loadFailure == nil {
+                if model.phase == .active || model.phase == .activeUnverified {
+                    activeInstruction.transition(.opacity.combined(with: .move(edge: .top)))
+                } else if model.phase == .coverageIncomplete {
+                    coverageNotice.transition(.opacity)
+                } else if model.phase == .resolved {
+                    resolvedNotice.transition(.opacity)
+                }
             }
         }
     }
@@ -191,12 +200,13 @@ struct ContentView: View {
         }
     }
 
-    private func syncProfile() { model.setProfile(profile.profile) }
+    private func syncProfile() { model.setProfile(profile.profile(using: registry)) }
 }
 
 private struct DetailsView: View {
     @ObservedObject var model: RealityViewModel
     @ObservedObject var profile: ProfileStore
+    @ObservedObject var registry: ZoneRegistry
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -211,9 +221,13 @@ private struct DetailsView: View {
                     }
                 }
                 Section("Saved contexts") {
-                    ForEach(Array(profile.contexts.enumerated()), id: \.offset) { _, context in
+                    ForEach(Array(profile.contexts(using: registry).enumerated()), id: \.offset) { _, context in
                         LabeledContent(context.0, value: context.1)
                     }
+                }
+                Section("Zone registry") {
+                    LabeledContent("Zones", value: "\(registry.zones.count)")
+                    LabeledContent("State", value: registry.loadFailure ?? "VALIDATED")
                 }
                 Section("System contract") {
                     Text("The foreground local receptor may verify official-origin observations and compute personal relevance. iOS does not guarantee continuous background polling, so the independent official alert channel remains the authority path when this app is suspended.")
