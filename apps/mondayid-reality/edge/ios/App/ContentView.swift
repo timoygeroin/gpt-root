@@ -94,7 +94,7 @@ struct ContentView: View {
                 .foregroundStyle(palette.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
-            if model.phase == .active {
+            if model.phase == .active || model.phase == .activeUnverified {
                 activeInstruction.transition(.opacity.combined(with: .move(edge: .top)))
             } else if model.phase == .coverageIncomplete {
                 coverageNotice.transition(.opacity)
@@ -107,9 +107,18 @@ struct ContentView: View {
     private var activeInstruction: some View {
         VStack(alignment: .leading, spacing: 18) {
             Divider()
-            Label("Official-origin active item", systemImage: "exclamationmark.octagon.fill")
-                .font(.headline)
-                .foregroundStyle(.red)
+            Label(
+                model.phase == .activeUnverified ? String(localized: "Last confirmed official-origin active item") : String(localized: "Official-origin active item"),
+                systemImage: model.phase == .activeUnverified ? "exclamationmark.octagon" : "exclamationmark.octagon.fill"
+            )
+            .font(.headline)
+            .foregroundStyle(.red)
+
+            if model.phase == .activeUnverified {
+                Text("Foreground coverage is currently unavailable. Verify the current official channel; this last confirmed active state remains visible until an authoritative observation clears or changes it.")
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(.primary)
+            }
 
             if !model.affectedContexts.isEmpty {
                 Text(model.affectedContexts.joined(separator: " · "))
@@ -119,9 +128,7 @@ struct ContentView: View {
 
             ForEach(model.relevantAlerts, id: \.sourceEventId) { alert in
                 VStack(alignment: .leading, spacing: 8) {
-                    if !alert.title.isEmpty {
-                        Text(alert.title).font(.title3.weight(.semibold))
-                    }
+                    if !alert.title.isEmpty { Text(alert.title).font(.title3.weight(.semibold)) }
                     if !alert.instruction.isEmpty {
                         Text(alert.instruction)
                             .font(.title2.weight(.semibold))
@@ -227,6 +234,7 @@ private struct DetailsView: View {
         case .unchanged: return "UNCHANGED"
         case .coverageIncomplete: return "COVERAGE_INCOMPLETE"
         case .active: return "ACTIVE"
+        case .activeUnverified: return "RETAINED_ACTIVE_DURING_COVERAGE_GAP"
         case .resolved: return "RESOLVED_FROM_VIEW"
         }
     }
