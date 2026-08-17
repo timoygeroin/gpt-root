@@ -8,7 +8,7 @@ public actor EdgeRuntime {
         self.receptor = receptor
     }
 
-    public struct Tick: Codable {
+    public struct Tick: Codable, Sendable {
         public let official: OrefObservation
         public let reality: LocalReality
         public let lifecycle: String

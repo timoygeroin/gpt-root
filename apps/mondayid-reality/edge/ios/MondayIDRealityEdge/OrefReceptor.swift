@@ -1,6 +1,6 @@
 import Foundation
 
-public enum CoverageState: String, Codable {
+public enum CoverageState: String, Codable, Sendable {
     case reachable = "REACHABLE"
     case geoBlocked = "GEO_BLOCKED"
     case degraded = "DEGRADED"
@@ -8,7 +8,7 @@ public enum CoverageState: String, Codable {
     case unknown = "UNKNOWN"
 }
 
-public struct OrefAlert: Codable, Hashable {
+public struct OrefAlert: Codable, Hashable, Sendable {
     public let sourceEventId: String
     public let category: String
     public let title: String
@@ -24,7 +24,7 @@ public struct OrefAlert: Codable, Hashable {
     }
 }
 
-public struct OrefObservation: Codable {
+public struct OrefObservation: Codable, Sendable {
     public let observedAt: Date
     public let coverage: CoverageState
     public let httpStatus: Int?

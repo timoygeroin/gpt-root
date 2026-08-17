@@ -1,12 +1,12 @@
 import Foundation
 
-public enum AuthorityState: String, Codable {
+public enum AuthorityState: String, Codable, Sendable {
     case officialActive = "OFFICIAL_ACTIVE"
     case officialObservedNoActiveItems = "OFFICIAL_NO_ACTIVE_ITEMS_OBSERVED"
     case coverageIncomplete = "COVERAGE_INCOMPLETE"
 }
 
-public struct PersonalProfile: Codable {
+public struct PersonalProfile: Codable, Sendable {
     public var homeAreas: Set<String>
     public var workAreas: Set<String>
     public var familyAreas: Set<String>
@@ -22,7 +22,7 @@ public struct PersonalProfile: Codable {
     public var allAreas: Set<String> { homeAreas.union(workAreas).union(familyAreas).union(routeAreas) }
 }
 
-public struct LocalReality: Codable {
+public struct LocalReality: Codable, Sendable {
     public let state: AuthorityState
     public let relevantAlerts: [OrefAlert]
     public let affectedContexts: [String]
