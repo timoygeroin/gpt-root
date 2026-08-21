@@ -1,0 +1,56 @@
+name: Mine MondayID Repository Candidates
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - mondayid-rebuild
+    paths:
+      - 'research/repo_queries.json'
+      - 'tools/repo_miner.py'
+      - '.github/workflows/mine-repositories.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  mine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run bounded GitHub miner
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 tools/repo_miner.py \
+            --queries research/repo_queries.json \
+            --output-json artifacts/repo-mining.json \
+            --output-md artifacts/repo-mining.md \
+            --per-query 10 \
+            --top-per-category 12
+
+      - name: Validate output
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+
+          payload = json.loads(Path('artifacts/repo-mining.json').read_text())
+          assert payload['candidate_count'] > 0
+          assert len(payload['candidates']) == payload['candidate_count']
+          for candidate in payload['candidates']:
+              assert candidate['full_name']
+              assert candidate['category']
+              assert candidate['html_url'].startswith('https://github.com/')
+          print(f"REPO_MINING_VALID candidates={payload['candidate_count']}")
+          PY
+
+      - name: Upload mining snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: mondayid-repo-mining
+          path: artifacts/
+          retention-days: 30

@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mondayid.local/schemas/receipt.json",
+  "title": "MondayID Mutation Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "receipt_id",
+    "timestamp",
+    "actor",
+    "intent",
+    "status",
+    "evidence_type",
+    "evidence",
+    "readback"
+  ],
+  "properties": {
+    "receipt_id": {
+      "type": "string",
+      "minLength": 8
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "actor": {
+      "type": "string",
+      "minLength": 1
+    },
+    "intent": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": ["completed", "partial", "blocked", "failed"]
+    },
+    "evidence_type": {
+      "enum": [
+        "tool_mutation",
+        "file_artifact",
+        "git_commit",
+        "airtable_record",
+        "behavioral_test",
+        "exact_blocker"
+      ]
+    },
+    "evidence": {
+      "type": "object",
+      "minProperties": 1
+    },
+    "readback": {
+      "type": "string",
+      "minLength": 1
+    },
+    "limits": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "next_action": {
+      "type": ["string", "null"]
+    }
+  }
+}
