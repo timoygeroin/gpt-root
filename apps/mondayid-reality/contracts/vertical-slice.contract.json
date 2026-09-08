@@ -1,0 +1,46 @@
+{
+  "contract": "MONDAYID_VERTICAL_SLICE",
+  "version": "1.0.0",
+  "status": "PROPOSED_EXECUTABLE_CONTRACT",
+  "goal": "Prove one end-to-end, read-only MondayID loop from input to bounded worker fan-out, evidence merge, safety gate, and receipt.",
+  "scope": {
+    "host": "ChatGPT-native MCP app",
+    "state": "stateless signed state",
+    "workers": {
+      "materialized_max": 8,
+      "roles": ["discover", "lineage", "skeptic", "reconcile"]
+    },
+    "mutation": "none"
+  },
+  "required_steps": [
+    "accept_input",
+    "derive_task_id",
+    "spawn_bounded_workers",
+    "collect_worker_outputs",
+    "preserve_disagreement",
+    "apply_authority_reducer",
+    "emit_receipt"
+  ],
+  "receipt_requirements": [
+    "request_id",
+    "parent_state_hash",
+    "worker_count",
+    "evidence_ids",
+    "contradictions",
+    "reducer_decision",
+    "readback",
+    "unknowns"
+  ],
+  "non_claims": [
+    "no live external agents",
+    "no background daemon",
+    "no canonical promotion",
+    "no safety coverage"
+  ],
+  "acceptance": {
+    "must_be_deterministic_for_fixture": true,
+    "must_fail_closed_on_missing_evidence": true,
+    "must_not_hide_worker_disagreement": true,
+    "must_return_machine_readable_receipt": true
+  }
+}
