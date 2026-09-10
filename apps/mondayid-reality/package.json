@@ -5,8 +5,8 @@
   "type": "module",
   "engines": { "node": ">=20" },
   "scripts": {
-    "check": "node --check api/mcp.js && node --check test/contract.test.js && node --check lib/vertical-slice.js && node --check test/vertical-slice.contract.test.js && node --check test/vertical-slice.executor.test.js",
-    "test": "node --test test/contract.test.js test/vertical-slice.contract.test.js test/vertical-slice.executor.test.js"
+    "check": "node --check api/mcp.js && node --check api/vertical-slice.js && node --check test/contract.test.js && node --check lib/vertical-slice.js && node --check test/vertical-slice.contract.test.js && node --check test/vertical-slice.executor.test.js && node --check test/vertical-slice.http.test.js",
+    "test": "node --test test/contract.test.js test/vertical-slice.contract.test.js test/vertical-slice.executor.test.js test/vertical-slice.http.test.js"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.20.2",
