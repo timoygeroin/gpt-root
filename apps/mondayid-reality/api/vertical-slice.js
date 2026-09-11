@@ -26,6 +26,7 @@ export function executeVerticalSliceRequest(body) {
     requestId: typeof options.requestId === 'string' ? options.requestId : undefined,
     parentStateHash: typeof options.parentStateHash === 'string' ? options.parentStateHash : undefined,
     workerCount: Number.isInteger(options.workerCount) ? options.workerCount : undefined,
+    requireBoundLineage: options.requireBoundLineage === true,
   });
 
   return {
@@ -39,6 +40,11 @@ export function executeVerticalSliceRequest(body) {
         request_id: result.receipt.request_id,
         reducer_decision: result.receipt.reducer_decision,
         worker_count: result.receipt.worker_count,
+        lineage_status: result.receipt.lineage_status,
+        parent_state_hash: result.receipt.parent_state_hash,
+        input_hash: result.receipt.input_hash,
+        decision_hash: result.receipt.decision_hash,
+        receipt_hash: result.receipt.receipt_hash,
         receipt_verified: result.receipt.readback?.verified === true,
       },
     },
@@ -52,7 +58,7 @@ export default async function handler(req, res) {
       service: 'MONDAYID_VERTICAL_SLICE',
       mode: 'READ_ONLY',
       mutation: 'none',
-      contract: 'input -> bounded workers -> contradiction reducer -> receipt -> readback',
+      contract: 'input -> bounded workers -> contradiction reducer -> provenance receipt -> readback',
     });
   }
 
