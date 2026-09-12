@@ -45,7 +45,9 @@ export function executeVerticalSliceRequest(body) {
         input_hash: result.receipt.input_hash,
         decision_hash: result.receipt.decision_hash,
         receipt_hash: result.receipt.receipt_hash,
-        receipt_verified: result.receipt.readback?.verified === true,
+        receipt_hash_valid: result.verification.receipt_hash_valid,
+        verification_scope: result.verification.scope,
+        independent_verification: result.verification.independent,
       },
     },
   };
@@ -58,7 +60,9 @@ export default async function handler(req, res) {
       service: 'MONDAYID_VERTICAL_SLICE',
       mode: 'READ_ONLY',
       mutation: 'none',
-      contract: 'input -> bounded workers -> contradiction reducer -> provenance receipt -> readback',
+      contract: 'input -> bounded workers -> contradiction reducer -> provenance receipt -> local integrity verification',
+      verification_scope: 'LOCAL_INTEGRITY_ONLY',
+      independent_verification: false,
     });
   }
 
