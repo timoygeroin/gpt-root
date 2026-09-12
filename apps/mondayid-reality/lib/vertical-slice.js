@@ -3,12 +3,13 @@ import { createHash } from 'node:crypto';
 const ROLES = ['discover', 'lineage', 'skeptic', 'reconcile'];
 const EXECUTION_CONTRACT = Object.freeze({
   id: 'MONDAYID_VERTICAL_SLICE',
-  version: 2,
+  version: 3,
   maxWorkers: 8,
   mutation: 'none',
   disagreementPolicy: 'preserve',
   missingEvidencePolicy: 'fail-closed',
   lineagePolicy: 'explicit-boundary',
+  verificationPolicy: 'local-integrity-not-independent-readback',
 });
 
 function stable(value) {
@@ -26,6 +27,12 @@ function sha256(value) {
   return createHash('sha256').update(JSON.stringify(stable(value))).digest('hex');
 }
 
+export function verifyVerticalSliceReceipt(receipt) {
+  if (!receipt || typeof receipt !== 'object' || typeof receipt.receipt_hash !== 'string') return false;
+  const { receipt_hash: claimedHash, ...receiptBody } = receipt;
+  return sha256(receiptBody) === claimedHash;
+}
+
 export function runVerticalSlice(input, options = {}) {
   const inputHash = sha256(input ?? null);
   const requestId = options.requestId ?? `req-${inputHash.slice(0, 12)}`;
@@ -34,14 +41,22 @@ export function runVerticalSlice(input, options = {}) {
     : null;
   const lineageStatus = parentStateHash ? 'BOUND' : 'UNBOUND';
   const evidence = Array.isArray(input?.evidence) ? input.evidence : [];
-  const workerCount = Math.min(Math.max(options.workerCount ?? ROLES.length, 0), EXECUTION_CONTRACT.maxWorkers);
-  const workers = ROLES.slice(0, workerCount).map((role, index) => ({
-    workerId: `${requestId}:w${index + 1}`,
-    role,
-    status: evidence.length ? 'COMPLETE' : 'BLOCKED_MISSING_EVIDENCE',
-    evidenceIds: evidence.map((item) => item.id).filter(Boolean),
-    hypothesis: evidence.length ? `${role}: processed ${evidence.length} evidence item(s)` : `${role}: no evidence available`,
-  }));
+  const requestedWorkerCount = Number.isInteger(options.workerCount) ? options.workerCount : ROLES.length;
+  const workerCount = Math.min(Math.max(requestedWorkerCount, 0), EXECUTION_CONTRACT.maxWorkers);
+  const workers = Array.from({ length: workerCount }, (_, index) => {
+    const role = ROLES[index % ROLES.length];
+    const roleInstance = Math.floor(index / ROLES.length) + 1;
+    return {
+      workerId: `${requestId}:w${index + 1}`,
+      role,
+      roleInstance,
+      status: evidence.length ? 'COMPLETE' : 'BLOCKED_MISSING_EVIDENCE',
+      evidenceIds: evidence.map((item) => item.id).filter(Boolean),
+      hypothesis: evidence.length
+        ? `${role}#${roleInstance}: processed ${evidence.length} evidence item(s)`
+        : `${role}#${roleInstance}: no evidence available`,
+    };
+  });
   const contradictions = evidence
     .filter((item) => item && item.claim && item.truth && item.claim !== item.truth)
     .map((item) => ({ evidenceId: item.id ?? null, claim: item.claim, truth: item.truth }));
@@ -75,11 +90,11 @@ export function runVerticalSlice(input, options = {}) {
     evidence_ids: evidence.map((item) => item.id).filter(Boolean),
     contradictions,
     reducer_decision: reducerDecision,
-    readback: { status: 'LOCAL_DETERMINISTIC', verified: true },
     unknowns,
     mutation: 'none',
   };
   const receipt = { ...receiptBody, receipt_hash: sha256(receiptBody) };
+  const receiptHashValid = verifyVerticalSliceReceipt(receipt);
 
   return {
     contract: EXECUTION_CONTRACT.id,
@@ -88,5 +103,10 @@ export function runVerticalSlice(input, options = {}) {
     workers,
     disagreement: contradictions,
     receipt,
+    verification: {
+      receipt_hash_valid: receiptHashValid,
+      scope: 'LOCAL_INTEGRITY_ONLY',
+      independent: false,
+    },
   };
 }
