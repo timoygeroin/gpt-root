@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { runVerticalSlice } from '../lib/vertical-slice.js';
+import { runVerticalSlice, verifyVerticalSliceReceipt } from '../lib/vertical-slice.js';
 
 test('vertical slice completes deterministically with evidence and bound lineage', () => {
   const input = { evidence: [{ id: 'E1', claim: 'reported', truth: 'reported' }] };
@@ -16,8 +16,33 @@ test('vertical slice completes deterministically with evidence and bound lineage
   assert.match(a.receipt.worker_outputs_hash, /^[a-f0-9]{64}$/);
   assert.match(a.receipt.decision_hash, /^[a-f0-9]{64}$/);
   assert.match(a.receipt.receipt_hash, /^[a-f0-9]{64}$/);
-  assert.equal(a.receipt.readback.verified, true);
+  assert.equal(verifyVerticalSliceReceipt(a.receipt), true);
+  assert.equal(a.verification.receipt_hash_valid, true);
+  assert.equal(a.verification.scope, 'LOCAL_INTEGRITY_ONLY');
+  assert.equal(a.verification.independent, false);
   assert.equal(a.receipt.mutation, 'none');
+});
+
+test('receipt verification detects tampering', () => {
+  const result = runVerticalSlice(
+    { evidence: [{ id: 'E1', claim: 'reported', truth: 'reported' }] },
+    { requestId: 'tamper', parentStateHash: 'PARENT' },
+  );
+  const tampered = { ...result.receipt, reducer_decision: 'HOLD_CONTRADICTION' };
+  assert.equal(verifyVerticalSliceReceipt(tampered), false);
+});
+
+test('worker fan-out materializes the contract maximum of eight workers', () => {
+  const result = runVerticalSlice(
+    { evidence: [{ id: 'E8', claim: 'x', truth: 'x' }] },
+    { requestId: 'fanout-8', parentStateHash: 'PARENT', workerCount: 8 },
+  );
+  assert.equal(result.workers.length, 8);
+  assert.equal(result.receipt.worker_count, 8);
+  assert.deepEqual(result.workers.map((worker) => worker.role), [
+    'discover', 'lineage', 'skeptic', 'reconcile',
+    'discover', 'lineage', 'skeptic', 'reconcile',
+  ]);
 });
 
 test('vertical slice fails closed without evidence and preserves the blocker', () => {
