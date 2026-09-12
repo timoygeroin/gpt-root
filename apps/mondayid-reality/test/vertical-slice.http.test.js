@@ -34,7 +34,18 @@ test('executeVerticalSliceRequest returns deterministic read-only receipt readba
   assert.equal(first.payload.readback.request_id, 'req-http-001');
   assert.equal(first.payload.readback.reducer_decision, 'ACCEPT_READ_ONLY');
   assert.equal(first.payload.readback.worker_count, 4);
-  assert.equal(first.payload.readback.receipt_verified, true);
+  assert.equal(first.payload.readback.receipt_hash_valid, true);
+  assert.equal(first.payload.readback.verification_scope, 'LOCAL_INTEGRITY_ONLY');
+  assert.equal(first.payload.readback.independent_verification, false);
+});
+
+test('HTTP path exposes all eight materialized workers when requested', () => {
+  const response = executeVerticalSliceRequest({
+    input: { evidence: [{ id: 'ev-8', claim: 'A', truth: 'A' }] },
+    options: { requestId: 'req-http-008', workerCount: 8 },
+  });
+  assert.equal(response.payload.result.workers.length, 8);
+  assert.equal(response.payload.readback.worker_count, 8);
 });
 
 test('HTTP handler preserves contradiction and exposes receipt through readback', async () => {
@@ -55,6 +66,8 @@ test('HTTP handler preserves contradiction and exposes receipt through readback'
   assert.equal(payload.result.receipt.reducer_decision, 'HOLD_CONTRADICTION');
   assert.equal(payload.result.disagreement.length, 1);
   assert.equal(payload.readback.reducer_decision, 'HOLD_CONTRADICTION');
+  assert.equal(payload.readback.receipt_hash_valid, true);
+  assert.equal(payload.readback.independent_verification, false);
   assert.equal(payload.mutation, 'none');
 });
 
@@ -71,7 +84,7 @@ test('HTTP handler is fail-closed when evidence is absent', async () => {
   assert.deepEqual(payload.result.receipt.unknowns, ['evidence_set']);
 });
 
-test('GET is a non-mutating capability readback', async () => {
+test('GET is a non-mutating capability readback with honest verification scope', async () => {
   const req = { method: 'GET', headers: {} };
   const res = mockResponse();
 
@@ -82,4 +95,6 @@ test('GET is a non-mutating capability readback', async () => {
   assert.equal(payload.service, 'MONDAYID_VERTICAL_SLICE');
   assert.equal(payload.mode, 'READ_ONLY');
   assert.equal(payload.mutation, 'none');
+  assert.equal(payload.verification_scope, 'LOCAL_INTEGRITY_ONLY');
+  assert.equal(payload.independent_verification, false);
 });
