@@ -1,0 +1,38 @@
+{
+  "schema": "MONDAYID_CANONICAL_RUNTIME_CELL_MANIFEST",
+  "version": 1,
+  "state": {
+    "state_id": "STATE-20260828-MONDAYID-SEXUALITY-SCIENCE-025",
+    "record_id": "recaYLnTFnDWJgvKZ",
+    "status": "VERIFIED_READY",
+    "canonical": true,
+    "parent_state_id": "STATE-20260828-RELATIONAL-FIELD-SELF-024"
+  },
+  "provenance": {
+    "immutable_snapshot_hash": null,
+    "parent_genome_hash": null,
+    "event_chain_hash": null,
+    "status": "INCOMPLETE",
+    "missing": [
+      "immutable_snapshot_hash",
+      "parent_genome_hash",
+      "event_chain_hash"
+    ]
+  },
+  "execution_policy": {
+    "mutation": "none",
+    "canonical_execution_allowed": false,
+    "fail_closed": true,
+    "required_before_canonical_execution": [
+      "immutable_snapshot_hash",
+      "parent_genome_hash",
+      "event_chain_hash"
+    ]
+  },
+  "claims": {
+    "registry_head_observed": true,
+    "immutable_genome_proven": false,
+    "complete_hash_chain_proven": false,
+    "canonical_runtime_cell_proven": false
+  }
+}
