@@ -1,6 +1,6 @@
 {
   "schema": "MONDAYID_CANONICAL_RUNTIME_CELL_MANIFEST",
-  "version": 1,
+  "version": 2,
   "state": {
     "state_id": "STATE-20260828-MONDAYID-SEXUALITY-SCIENCE-025",
     "record_id": "recaYLnTFnDWJgvKZ",
@@ -19,20 +19,35 @@
       "event_chain_hash"
     ]
   },
+  "proven_ancestor": {
+    "state_id": "STATE-20260812-MONDAYID-HUMAN-FOCUS-018",
+    "anchor_kind": "EXECUTABLE_PORTABLE_SEED",
+    "github_branch": "agent/mondayid-organism-completion-v1",
+    "github_head": "140582386b382ecf5625e091753c82a8213c1caf",
+    "archive_sha256": "00731e32620b3554bc03acbe4fceb361771a463cc252c4fd10f1887d8554a232",
+    "genome_sha256": "bdc3867cad6dba40817587a590d55485d1628d0c6805cc2484e02791a5fd9a01",
+    "ledger_head": "470c5d51504eef84f3bbb0f84c1c90d8235f9ae270fb14b84b90bb707b43cc3f",
+    "evidence_status": "PROVEN_ANCESTOR",
+    "continuity_to_current_state": "NOT_PROVEN"
+  },
   "execution_policy": {
     "mutation": "none",
     "canonical_execution_allowed": false,
+    "ancestor_bound_execution_allowed": true,
     "fail_closed": true,
     "required_before_canonical_execution": [
       "immutable_snapshot_hash",
       "parent_genome_hash",
       "event_chain_hash"
-    ]
+    ],
+    "forbid_ancestor_hash_as_current_hash": true
   },
   "claims": {
     "registry_head_observed": true,
+    "proven_executable_ancestor_observed": true,
     "immutable_genome_proven": false,
     "complete_hash_chain_proven": false,
+    "ancestor_to_current_continuity_proven": false,
     "canonical_runtime_cell_proven": false
   }
 }
